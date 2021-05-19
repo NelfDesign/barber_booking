@@ -51,49 +51,51 @@ class MyHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, watch) {
-    return Scaffold(
-      key: scaffoldState,
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/my_bg.png"),
-            fit: BoxFit.cover
-          )
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-           Container(
-             padding: const EdgeInsets.all(16),
-             width: MediaQuery.of(context).size.width,
-             child: FutureBuilder(
-               future: checkLoginState(context, false, scaffoldState),
-               builder: (context, snapshot){
-                 if(snapshot.connectionState == ConnectionState.waiting){
-                   return Center(child: CircularProgressIndicator());
-                 }else{
-                   var userState = snapshot.data as LOGIN_STATE;
-                   if(userState == LOGIN_STATE.LOGGED){
-                      return Container();
-                   } else {// if user not login before then return button
-                     return ElevatedButton.icon(
-                         icon: Icon(Icons.phone, color: Colors.white,),
-                         label: Text("Login with phone",style: TextStyle(
-                             color: Colors.white
-                         ),),
-                         style: ButtonStyle(
-                           backgroundColor: MaterialStateProperty.all(Colors.black),
-                         ),
-                         onPressed: () => processLogin(context)
-                     );
+    return SafeArea(
+      child: Scaffold(
+        key: scaffoldState,
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/my_bg.png"),
+              fit: BoxFit.cover
+            )
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+             Container(
+               padding: const EdgeInsets.all(16),
+               width: MediaQuery.of(context).size.width,
+               child: FutureBuilder(
+                 future: checkLoginState(context, false, scaffoldState),
+                 builder: (context, snapshot){
+                   if(snapshot.connectionState == ConnectionState.waiting){
+                     return Center(child: CircularProgressIndicator());
+                   }else{
+                     var userState = snapshot.data as LOGIN_STATE;
+                     if(userState == LOGIN_STATE.LOGGED){
+                        return Container();
+                     } else {// if user not login before then return button
+                       return ElevatedButton.icon(
+                           icon: Icon(Icons.phone, color: Colors.white,),
+                           label: Text("Login with phone",style: TextStyle(
+                               color: Colors.white
+                           ),),
+                           style: ButtonStyle(
+                             backgroundColor: MaterialStateProperty.all(Colors.black),
+                           ),
+                           onPressed: () => processLogin(context)
+                       );
+                     }
                    }
-                 }
-               },
-             ),
-           )
-          ],
-        ),
-      )
+                 },
+               ),
+             )
+            ],
+          ),
+        )
+      ),
     );
   }
 
@@ -157,7 +159,7 @@ class MyHomePage extends ConsumerWidget {
                     ),controller: nameController,),
                     TextField(decoration: InputDecoration(
                         icon: Icon(Icons.home),
-                        labelText: 'Adress'
+                        labelText: 'Address'
                     ),controller: adressController,),
                   ],
                 ),
@@ -168,7 +170,7 @@ class MyHomePage extends ConsumerWidget {
                     userRef.doc(FirebaseAuth.instance.currentUser.phoneNumber)
                         .set({
                       'name': nameController.text,
-                      'adress': adressController.text
+                      'address': adressController.text
                     }).then((value) async {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(scaffoldState.currentContext).showSnackBar(
