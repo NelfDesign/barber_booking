@@ -1,0 +1,5 @@
+
+enum LOGIN_STATE {
+  LOGGED,
+  NOT_LOGIN
+}

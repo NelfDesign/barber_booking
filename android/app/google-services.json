@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "59158055591",
+    "project_id": "flutterbarberbooking-cec5e",
+    "storage_bucket": "flutterbarberbooking-cec5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59158055591:android:e97df3bcbe40bd61ea2982",
+        "android_client_info": {
+          "package_name": "com.nelfdesign.barber_booking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59158055591-thbrtcd67l3966t1oa1kdfpq16uh5dq4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nelfdesign.barber_booking",
+            "certificate_hash": "660414609b997c82da00928b82a694debf7d99ae"
+          }
+        },
+        {
+          "client_id": "59158055591-of71d80snf02g6185idfg42pl3urvuus.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJRHttAZf-TmX1FsLJTW9jTIWWuezFo_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59158055591-of71d80snf02g6185idfg42pl3urvuus.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
