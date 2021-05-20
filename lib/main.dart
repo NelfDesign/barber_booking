@@ -1,4 +1,5 @@
 import 'package:barber_booking/state/state_management.dart';
+import 'package:barber_booking/ui/booking_screen.dart';
 import 'package:barber_booking/ui/home_screen.dart';
 import 'package:barber_booking/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,6 +31,12 @@ class MyApp extends StatelessWidget {
           case '/home':
             return PageTransition(
                 child: HomePage(),
+                settings: settings,
+                type: PageTransitionType.fade);
+            break;
+          case '/booking':
+            return PageTransition(
+                child: BookingScreen(),
                 settings: settings,
                 type: PageTransitionType.fade);
             break;

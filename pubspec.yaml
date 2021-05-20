@@ -37,6 +37,7 @@ dependencies:
   page_transition: any
   rflutter_alert: any
   carousel_slider: ^3.0.0
+  im_stepper: any
 
 
 dev_dependencies:
