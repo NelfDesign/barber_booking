@@ -36,6 +36,7 @@ dependencies:
   flutter_riverpod: any
   page_transition: any
   rflutter_alert: any
+  carousel_slider: ^3.0.0
 
 
 dev_dependencies:
