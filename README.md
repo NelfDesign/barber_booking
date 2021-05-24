@@ -2,6 +2,22 @@
 
 Une application de reservation chez le coiffeur.
 
+## Install instruction
+  - Click on Green Download button to dowload it in zip or you can clone it with git clone 
+    https://github.com/NelfDesign/OC_Todoc_Projet_5
+  - Unzip file and paste it in your AndroidStudioProject file or in AndroidStudio choose File/Open and select the project
+
+## Run app
+  - Run the app with Run/Run and choose app in selected view
+  - You can run the app on a real device or an emulator
+
+## Librairies
+  - google_fonts
+  - firebase
+  - riverpod
+  - carousel_slider
+  - im_stepper
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
