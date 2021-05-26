@@ -1,3 +1,4 @@
+import 'package:barber_booking/model/barber_model.dart';
 import 'package:barber_booking/model/city_model.dart';
 import 'package:barber_booking/model/salon_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,7 +19,24 @@ Future<List<SalonModel>> getSalonByCity(String cityName) async {
       .doc(cityName.replaceAll(' ', '')).collection("Branch");
   QuerySnapshot snapshot = await salonRef.get();
   snapshot.docs.forEach((element) {
-    result.add(SalonModel.fromJson(element.data()));
+    var salon = SalonModel.fromJson(element.data());
+    salon.docId = element.id;
+    salon.reference = element.reference;
+    result.add(salon);
+  });
+  return result;
+}
+
+Future<List<BarberModel>> getBarberBySalon(SalonModel salon) async {
+  List<BarberModel> result = new List<BarberModel>.empty(growable: true);
+  CollectionReference barberRef = salon.reference.collection("Barber");
+  QuerySnapshot snapshot = await barberRef.get();
+
+  snapshot.docs.forEach((element) {
+    var barber = BarberModel.fromJson(element.data());
+    barber.docId = element.id;
+    barber.reference = element.reference;
+    result.add(barber);
   });
   return result;
 }

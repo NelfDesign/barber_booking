@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class SalonModel {
 
-  String name, address;
+  String name, address, docId;
+  DocumentReference reference;
 
   SalonModel({this.name, this.address});
 

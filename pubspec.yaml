@@ -38,6 +38,7 @@ dependencies:
   rflutter_alert: any
   carousel_slider: ^3.0.0
   im_stepper: any
+  flutter_rating_bar: ^4.0.0
 
 
 dev_dependencies:

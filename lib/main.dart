@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends ConsumerWidget {
-  GlobalKey<ScaffoldState> scaffoldState = new GlobalKey();
+  final GlobalKey<ScaffoldState> scaffoldState = new GlobalKey();
 
   @override
   Widget build(BuildContext context, watch) {
