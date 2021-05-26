@@ -17,6 +17,7 @@ Une application de reservation chez le coiffeur.
   - riverpod
   - carousel_slider
   - im_stepper
+  - flutter_rating_bar
   - flutter_datetime_picker
 
 ## Getting Started
