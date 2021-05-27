@@ -3,6 +3,7 @@ import 'package:barber_booking/model/barber_model.dart';
 import 'package:barber_booking/model/city_model.dart';
 import 'package:barber_booking/model/salon_model.dart';
 import 'package:barber_booking/state/state_management.dart';
+import 'package:barber_booking/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -20,6 +21,7 @@ class BookingScreen extends ConsumerWidget {
     var salonWatch = watch(selectedSalon).state;
     var barberWatch = watch(selectedBarber).state;
     var dateWatch = watch(selectedDate).state;
+    var timeWatch = watch(selectedTime).state;
 
     return SafeArea(
         child: Scaffold(
@@ -40,6 +42,7 @@ class BookingScreen extends ConsumerWidget {
           ),
           //Screen
           Expanded(
+              flex: 10,
               child: step == 1
                   ? displayCityList()
                   : step == 2
@@ -304,7 +307,35 @@ class BookingScreen extends ConsumerWidget {
               )
             ],
           ),
-        )
+        ),
+        Expanded(child: GridView.builder(
+        itemCount: TIME_SLOT.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 5
+            ),
+            itemBuilder: (context, index) => GestureDetector(
+              onTap: () {
+                context.read(selectedTime).state = TIME_SLOT.elementAt(index);
+              },
+              child: Card(
+                color: context.read(selectedTime).state == TIME_SLOT.elementAt(index) ? Colors.greenAccent : Colors.white,
+                child: GridTile(
+                  child: Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                          Text("${TIME_SLOT.elementAt(index)}"),
+                          Text("Available"),
+                      ],
+                    ),
+                  ),
+                  header: context.read(selectedTime).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check) : null,
+                ),
+              ),
+            )
+        ))
       ],
     );
   }
