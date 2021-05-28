@@ -4,6 +4,7 @@ import 'package:barber_booking/model/city_model.dart';
 import 'package:barber_booking/model/salon_model.dart';
 import 'package:barber_booking/state/state_management.dart';
 import 'package:barber_booking/utils/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -14,6 +15,7 @@ import 'package:im_stepper/stepper.dart';
 import 'package:intl/intl.dart';
 
 class BookingScreen extends ConsumerWidget {
+  GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey();
   @override
   Widget build(BuildContext context, watch) {
     var step = watch(currentStep).state;
@@ -22,82 +24,103 @@ class BookingScreen extends ConsumerWidget {
     var barberWatch = watch(selectedBarber).state;
     var dateWatch = watch(selectedDate).state;
     var timeWatch = watch(selectedTime).state;
+    var timeSlotWatch = watch(selectedTimeSlot).state;
 
     return SafeArea(
         child: Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Color(0xFFFDF9EE),
-      body: Column(
-        children: [
-          //step
-          NumberStepper(
-            activeStep: step - 1,
-            direction: Axis.horizontal,
-            enableNextPreviousButtons: false,
-            enableStepTapping: false,
-            numbers: [1, 2, 3, 4, 5],
-            stepColor: Colors.black,
-            activeStepColor: Colors.blue,
-            numberStyle: TextStyle(color: Colors.white),
-          ),
-          //Screen
-          Expanded(
-              flex: 10,
-              child: step == 1
-                  ? displayCityList()
-                  : step == 2
+          key: scaffoldKey,
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Color(0xFFFDF9EE),
+          body: Column(
+            children: [
+              //step
+              NumberStepper(
+                activeStep: step - 1,
+                direction: Axis.horizontal,
+                enableNextPreviousButtons: false,
+                enableStepTapping: false,
+                numbers: [1, 2, 3, 4, 5],
+                stepColor: Colors.black,
+                activeStepColor: Colors.blue,
+                numberStyle: TextStyle(color: Colors.white),
+              ),
+              //Screen
+              Expanded(
+                  flex: 10,
+                  child: step == 1
+                      ? displayCityList()
+                      : step == 2
                       ? displaySalon(cityWatch.name)
                       : step == 3
-                          ? displayBarber(salonWatch)
-                          : step == 4
-                              ? displayTimeSlot(context, barberWatch)
-                              : Container()),
-          //button
-          Expanded(
-              child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      child: ElevatedButton(
-                    child: Text('Previous'),
-                    onPressed: step == 1
-                        ? null
-                        : () => context.read(currentStep).state--,
-                  )),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  Expanded(
-                      child: ElevatedButton(
-                    child: Text('Next'),
-                    //disable button next if nothing is selected
-                    onPressed: (step == 1 &&
-                                context.read(selectedCity).state.name ==
-                                    null) ||
-                            (step == 2 &&
-                                context.read(selectedSalon).state.docId ==
-                                    null) ||
-                            (step == 3 &&
-                                context.read(selectedBarber).state.docId ==
-                                    null) ||
-                            (step == 4 &&
-                                context.read(selectedTimeSlot).state == -1)
-                        ? null
-                        : step == 5
-                            ? null
-                            : () => context.read(currentStep).state++,
-                  )),
-                ],
-              ),
-            ),
-          ))
-        ],
-      ),
-    ));
+                      ? displayBarber(salonWatch)
+                      : step == 4
+                      ? displayTimeSlot(context, barberWatch)
+                      : step == 5
+                      ? displayConfirm(context)
+                      : Container()),
+              //button
+              Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                              child: ElevatedButton(
+                                child: Text('Previous'),
+                                onPressed: step == 1
+                                    ? null
+                                    : () =>
+                                context
+                                    .read(currentStep)
+                                    .state--,
+                              )),
+                          SizedBox(
+                            width: 30,
+                          ),
+                          Expanded(
+                              child: ElevatedButton(
+                                child: Text('Next'),
+                                //disable button next if nothing is selected
+                                onPressed: (step == 1 &&
+                                    context
+                                        .read(selectedCity)
+                                        .state
+                                        .name ==
+                                        null) ||
+                                    (step == 2 &&
+                                        context
+                                            .read(selectedSalon)
+                                            .state
+                                            .docId ==
+                                            null) ||
+                                    (step == 3 &&
+                                        context
+                                            .read(selectedBarber)
+                                            .state
+                                            .docId ==
+                                            null) ||
+                                    (step == 4 &&
+                                        context
+                                            .read(selectedTimeSlot)
+                                            .state == -1)
+                                    ? null
+                                    : step == 5
+                                    ? null
+                                    : () =>
+                                context
+                                    .read(currentStep)
+                                    .state++,
+                              )),
+                        ],
+                      ),
+                    ),
+                  ))
+            ],
+          ),
+        ));
   }
 
   displayCityList() {
@@ -120,15 +143,20 @@ class BookingScreen extends ConsumerWidget {
                 itemBuilder: (ctx, index) {
                   return GestureDetector(
                     onTap: () =>
-                        context.read(selectedCity).state = cities[index],
+                    context
+                        .read(selectedCity)
+                        .state = cities[index],
                     child: Card(
                       child: ListTile(
                         leading: Icon(
                           Icons.home_work,
                           color: Colors.black,
                         ),
-                        trailing: context.read(selectedCity).state.name ==
-                                cities[index].name
+                        trailing: context
+                            .read(selectedCity)
+                            .state
+                            .name ==
+                            cities[index].name
                             ? Icon(Icons.check)
                             : null,
                         title: Text(
@@ -165,15 +193,20 @@ class BookingScreen extends ConsumerWidget {
                 itemBuilder: (ctx, index) {
                   return GestureDetector(
                     onTap: () =>
-                        context.read(selectedSalon).state = salons[index],
+                    context
+                        .read(selectedSalon)
+                        .state = salons[index],
                     child: Card(
                       child: ListTile(
                         leading: Icon(
                           Icons.home_outlined,
                           color: Colors.black,
                         ),
-                        trailing: context.read(selectedSalon).state.docId ==
-                                salons[index].docId
+                        trailing: context
+                            .read(selectedSalon)
+                            .state
+                            .docId ==
+                            salons[index].docId
                             ? Icon(Icons.check)
                             : null,
                         title: Text(
@@ -215,15 +248,20 @@ class BookingScreen extends ConsumerWidget {
                 itemBuilder: (ctx, index) {
                   return GestureDetector(
                     onTap: () =>
-                        context.read(selectedBarber).state = barbers[index],
+                    context
+                        .read(selectedBarber)
+                        .state = barbers[index],
                     child: Card(
                       child: ListTile(
                           leading: Icon(
                             Icons.person,
                             color: Colors.black,
                           ),
-                          trailing: context.read(selectedBarber).state.docId ==
-                                  barbers[index].docId
+                          trailing: context
+                              .read(selectedBarber)
+                              .state
+                              .docId ==
+                              barbers[index].docId
                               ? Icon(Icons.check)
                               : null,
                           title: Text(
@@ -236,10 +274,11 @@ class BookingScreen extends ConsumerWidget {
                             initialRating: barbers[index].rating,
                             direction: Axis.horizontal,
                             itemCount: 5,
-                            itemBuilder: (context, _) => Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
+                            itemBuilder: (context, _) =>
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
                             itemPadding: const EdgeInsets.all(4),
                             onRatingUpdate: (rating) {
                               print(rating);
@@ -256,7 +295,9 @@ class BookingScreen extends ConsumerWidget {
 
   displayTimeSlot(BuildContext context, BarberModel barberModel) {
     var now = DateTime.now();
-    var selected = context.read(selectedDate).state;
+    var selected = context
+        .read(selectedDate)
+        .state;
     return Column(
       children: [
         Container(
@@ -266,35 +307,40 @@ class BookingScreen extends ConsumerWidget {
             children: [
               Expanded(
                   child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                        Text(
-                          "${DateFormat.MMMM().format(selected)}",
-                          style: GoogleFonts.robotoMono(color: Colors.white54),
-                        ),
-                      Text(
-                        "${selected.day}",
-                        style: GoogleFonts.robotoMono(color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          Text(
+                            "${DateFormat.MMMM().format(selected)}",
+                            style: GoogleFonts.robotoMono(color: Colors
+                                .white54),
+                          ),
+                          Text(
+                            "${selected.day}",
+                            style: GoogleFonts.robotoMono(color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22),
+                          ),
+                          Text(
+                            "${DateFormat.EEEE().format(selected)}",
+                            style: GoogleFonts.robotoMono(color: Colors
+                                .white54),
+                          ),
+                        ],
                       ),
-                      Text(
-                        "${DateFormat.EEEE().format(selected)}",
-                        style: GoogleFonts.robotoMono(color: Colors.white54),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
+                    ),
+                  )),
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   DatePicker.showDatePicker(context,
-                    showTitleActions: true,
-                    minTime: now,
-                    maxTime: now.add(Duration(days: 31)),
-                    onConfirm: (date) => context.read(selectedDate).state = date
+                      showTitleActions: true,
+                      minTime: now,
+                      maxTime: now.add(Duration(days: 31)),
+                      onConfirm: (date) =>
+                      context
+                          .read(selectedDate)
+                          .state = date
                   );
                 },
                 child: Padding(
@@ -309,32 +355,204 @@ class BookingScreen extends ConsumerWidget {
           ),
         ),
         Expanded(child: GridView.builder(
-        itemCount: TIME_SLOT.length,
+            itemCount: TIME_SLOT.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 5
+                crossAxisCount: 3,
+                crossAxisSpacing: 5
             ),
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: () {
-                context.read(selectedTime).state = TIME_SLOT.elementAt(index);
-              },
-              child: Card(
-                color: context.read(selectedTime).state == TIME_SLOT.elementAt(index) ? Colors.greenAccent : Colors.white,
-                child: GridTile(
-                  child: Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                          Text("${TIME_SLOT.elementAt(index)}"),
-                          Text("Available"),
-                      ],
+            itemBuilder: (context, index) =>
+                GestureDetector(
+                  onTap: () {
+                    context
+                        .read(selectedTime)
+                        .state = TIME_SLOT.elementAt(index);
+
+                    context.read(selectedTimeSlot).state = index;
+                  },
+                  child: Card(
+                    color: context
+                        .read(selectedTime)
+                        .state == TIME_SLOT.elementAt(index) ? Colors
+                        .greenAccent : Colors.white,
+                    child: GridTile(
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("${TIME_SLOT.elementAt(index)}"),
+                            Text("Available"),
+                          ],
+                        ),
+                      ),
+                      header: context
+                          .read(selectedTime)
+                          .state == TIME_SLOT.elementAt(index) ? Icon(
+                          Icons.check) : null,
                     ),
                   ),
-                  header: context.read(selectedTime).state == TIME_SLOT.elementAt(index) ? Icon(Icons.check) : null,
-                ),
+                )
+        ))
+      ],
+    );
+  }
+
+  confirmBooking(BuildContext context) {
+    var timeStamp = DateTime(
+        context
+            .read(selectedDate)
+            .state
+            .year,
+        context
+            .read(selectedDate)
+            .state
+            .month,
+        context
+            .read(selectedDate)
+            .state
+            .day,
+        int.parse(context
+            .read(selectedTime)
+            .state
+            .split(':')[0].substring(0, 2)), // hour
+        int.parse(context
+            .read(selectedTime)
+            .state
+            .split(':')[1].substring(0, 2)) // minutes
+    ).millisecond;
+    var submitData = {
+      'barberId': context
+          .read(selectedBarber)
+          .state
+          .docId,
+      'barberName': context
+          .read(selectedBarber)
+          .state
+          .name,
+      'cityBook': context
+          .read(selectedCity)
+          .state
+          .name,
+      'customerName': context
+          .read(userInformation)
+          .state
+          .name,
+      'customerPhone': FirebaseAuth.instance.currentUser.phoneNumber,
+      'done': false,
+      'salonAddress': context
+          .read(selectedSalon)
+          .state
+          .address,
+      'salonId': context
+          .read(selectedSalon)
+          .state
+          .docId,
+      'salonName': context
+          .read(selectedSalon)
+          .state
+          .name,
+      'slot': context
+          .read(selectedTimeSlot)
+          .state,
+      'timeStamp': timeStamp,
+      'time': '${context
+          .read(selectedTime)
+          .state} - ${DateFormat('dd/MM/yyyy').format(context
+          .read(selectedDate)
+          .state)}'
+    };
+    //submit on FireStore
+    context
+        .read(selectedBarber)
+        .state
+        .reference
+        .collection('${DateFormat('dd_MM_yyyy').format(context
+        .read(selectedDate)
+        .state)}')
+    .doc(context.read(selectedTimeSlot).state.toString())
+    .set(submitData)
+    .then((value) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(scaffoldKey.currentContext).showSnackBar(SnackBar(content: Text('Booking successfully!!'),));
+        //reset value
+        context.read(selectedDate).state = DateTime.now();
+        context.read(selectedBarber).state = BarberModel();
+        context.read(selectedCity).state = CityModel();
+        context.read(selectedSalon).state = SalonModel();
+        context.read(selectedTime).state ='';
+        context.read(selectedTimeSlot).state = -1;
+        context.read(currentStep).state = 1;
+    });
+  }
+
+  displayConfirm(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Image.asset('assets/images/logo.png'),
+        )),
+        Expanded(child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Text('Thank you for booking our services!'.toUpperCase(),
+                  style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),),
+                  Text('Booking informations'.toUpperCase(),
+                    style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today),
+                      SizedBox(width: 20,),
+                      Text('${context.read(selectedTime).state} - '
+                          '${DateFormat('dd/MM/yyyy').format(context.read(selectedDate).state)}'.toUpperCase(),
+                        style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),)
+                    ],
+                  ),
+                  SizedBox(height: 10,),
+                  Row(
+                    children: [
+                      Icon(Icons.person),
+                      SizedBox(width: 20,),
+                      Text('${context.read(selectedBarber).state.name}'.toUpperCase(),
+                        style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),)
+                    ],
+                  ),
+                  SizedBox(height: 10,),
+                  Divider(thickness: 1,),
+                  Row(
+                    children: [
+                      Icon(Icons.home),
+                      SizedBox(width: 20,),
+                      Text('${context.read(selectedSalon).state.name}'.toUpperCase(),
+                        style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),)
+                    ],
+                  ),
+                  SizedBox(height: 10,),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on),
+                      SizedBox(width: 20,),
+                      Text('${context.read(selectedSalon).state.address}'.toUpperCase(),
+                        style: GoogleFonts.robotoMono(fontWeight: FontWeight.bold),)
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () => confirmBooking(context),
+                    child: Text('Confirm',),
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.teal)
+                    ),
+                  )
+                ],
               ),
-            )
+            ),
+          ),
         ))
       ],
     );
