@@ -322,57 +322,77 @@ class BookingScreen extends ConsumerWidget {
         ),
         Expanded(
             child: FutureBuilder(
-          future: getBarberTimeSlot(
-              barberModel,
-              DateFormat('dd_MM_yyyy')
-                  .format(context.read(selectedDate).state)),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting)
+          future: getMaxAvailableTimeSlot(),
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting)
               return Center(
                 child: CircularProgressIndicator(),
               );
             else {
-              var listTimeSlot = snapshot.data as List<int>;
-              return GridView.builder(
-                  itemCount: TIME_SLOT.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, crossAxisSpacing: 5),
-                  itemBuilder: (context, index) => GestureDetector(
-                        onTap: listTimeSlot.contains(index)
-                            ? null
-                            : () {
-                                context.read(selectedTime).state =
-                                    TIME_SLOT.elementAt(index);
+              var maxTime = snap.data as int;
+              return FutureBuilder(
+                future: getBarberTimeSlot(
+                    barberModel,
+                    DateFormat('dd_MM_yyyy')
+                        .format(context.read(selectedDate).state)),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting)
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  else {
+                    var listTimeSlot = snapshot.data as List<int>;
+                    return GridView.builder(
+                        itemCount: TIME_SLOT.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3, crossAxisSpacing: 5),
+                        itemBuilder: (context, index) => GestureDetector(
+                              onTap: maxTime > index ||
+                                      listTimeSlot.contains(index)
+                                  ? null
+                                  : () {
+                                      context.read(selectedTime).state =
+                                          TIME_SLOT.elementAt(index);
 
-                                context.read(selectedTimeSlot).state = index;
-                              },
-                        child: Card(
-                          color: listTimeSlot.contains(index)
-                            ? Colors.white10
-                            : context.read(selectedTime).state ==
-                                  TIME_SLOT.elementAt(index)
-                              ? Colors.greenAccent
-                              : Colors.white,
-                          child: GridTile(
-                            child: Center(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("${TIME_SLOT.elementAt(index)}"),
-                                  Text(listTimeSlot.contains(index)
-                                      ? "Full"
-                                      : "Available"),
-                                ],
+                                      context.read(selectedTimeSlot).state =
+                                          index;
+                                    },
+                              child: Card(
+                                color: listTimeSlot.contains(index)
+                                    ? Colors.green
+                                    : maxTime > index
+                                        ? Colors.white10
+                                        : context.read(selectedTime).state ==
+                                                TIME_SLOT.elementAt(index)
+                                            ? Colors.greenAccent
+                                            : Colors.white,
+                                child: GridTile(
+                                  child: Center(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text("${TIME_SLOT.elementAt(index)}"),
+                                        Text(listTimeSlot.contains(index)
+                                            ? "Full"
+                                            : maxTime > index
+                                                ? 'Not Available'
+                                                : "Available"),
+                                      ],
+                                    ),
+                                  ),
+                                  header: context.read(selectedTime).state ==
+                                          TIME_SLOT.elementAt(index)
+                                      ? Icon(Icons.check)
+                                      : null,
+                                ),
                               ),
-                            ),
-                            header: context.read(selectedTime).state ==
-                                    TIME_SLOT.elementAt(index)
-                                ? Icon(Icons.check)
-                                : null,
-                          ),
-                        ),
-                      ));
+                            ));
+                  }
+                },
+              );
             }
           },
         ))
@@ -436,6 +456,28 @@ class BookingScreen extends ConsumerWidget {
       context.read(selectedTime).state = '';
       context.read(selectedTimeSlot).state = -1;
       context.read(currentStep).state = 1;
+
+      //create event
+      final event = Event(
+          title: 'Barber Appointment',
+          description:
+              'Barber appointment ${context.read(selectedTime).state} - ${DateFormat('dd/MM/yyyy').format(context.read(selectedDate).state)}',
+          location: '${context.read(selectedSalon).state.address}',
+          startDate: DateTime(
+              context.read(selectedDate).state.year,
+              context.read(selectedDate).state.month,
+              context.read(selectedDate).state.day,
+              hour,
+              minutes),
+          endDate: DateTime(
+              context.read(selectedDate).state.year,
+              context.read(selectedDate).state.month,
+              context.read(selectedDate).state.day,
+              hour,
+              minutes + 30),
+          iosParams: IOSParams(reminder: Duration(minutes: 30)),
+          androidParams: AndroidParams(emailInvites: []));
+      Add2Calendar.addEvent2Cal(event).then((value) {});
     });
   }
 
