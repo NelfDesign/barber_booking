@@ -40,3 +40,15 @@ Future<List<BarberModel>> getBarberBySalon(SalonModel salon) async {
   });
   return result;
 }
+
+Future<List<int>> getBarberTimeSlot(BarberModel barberModel, String date) async {
+  List<int> result = new List<int>.empty(growable: true);
+  var bookingRef = barberModel.reference.collection(date);
+  QuerySnapshot snapshot = await bookingRef.get();
+
+  snapshot.docs.forEach((element) {
+    result.add(int.parse(element.id));
+  });
+  return result;
+}
+
